@@ -13,7 +13,8 @@ def calculate_good_matches(args):
 
     # Check if images are loaded correctly
     if query_img is None or current_img is None:
-        return filename, 0, 0
+        #print(f"Error: Image {filename} not loaded correctly.")
+        return filename, 0
 
     # Resize the query image
     query_img = cv.resize(query_img, (100, 100))
@@ -36,14 +37,12 @@ def calculate_good_matches(args):
 
     # Check if descriptors are computed correctly
     if des1 is None or des2 is None:
-        return filename, 0, 0
+        #print(f"Error: Descriptors for image {filename} not computed correctly.")
+        return filename, 0
 
     # BFMatcher with default params
     bf = cv.BFMatcher()
     matches = bf.knnMatch(des1, des2, k=2)
-
-    # Calculate total number of matches
-    total_matches = len(matches)
 
     # Apply ratio test
     good = []
@@ -51,14 +50,12 @@ def calculate_good_matches(args):
         if m.distance < 0.75 * n.distance:
             good.append([m])
 
-    # Calculate match percentage
-    match_percentage = (len(good) / total_matches) * 100
-
-    return filename, len(good), match_percentage
+    return filename, len(good)
 
 if __name__ == '__main__':
-    # Directory with the photostorage images
-    target_dir = 'images/'
+    # Directory with the target images
+    #target_dir = 'images/'
+    target_dir = r'E:\magic things\full-download'
 
     # Variables to keep track of the best match
     best_match = None
@@ -67,10 +64,10 @@ if __name__ == '__main__':
 
     # Create a multiprocessing Pool
     with Pool() as p:
-        # Loop over all images in the photostorage directory
+        # Loop over all images in the target directory
         for filename in tqdm(os.listdir(target_dir)):
             # Process each image individually
-            filename, num_good_matches, match_percentage = p.apply(calculate_good_matches, args=((filename, target_dir),))
+            filename, num_good_matches = p.apply(calculate_good_matches, args=((filename, target_dir),))
             # If this image is a better match than the current best match, update the best match
             if num_good_matches > max_good_matches:
                 max_good_matches = num_good_matches
@@ -83,7 +80,7 @@ if __name__ == '__main__':
     print(f"Number of good matches: {max_good_matches}")
 
     # Load the query image
-    query_img = cv.imread('img.jpg')
+    query_img = cv.imread('largest_box.jpg')
 
     # Load the best match
     best_match_img = cv.imread(os.path.join(target_dir, best_match))
