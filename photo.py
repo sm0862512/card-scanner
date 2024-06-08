@@ -53,9 +53,9 @@ def calculate_good_matches(args):
     return filename, len(good)
 
 if __name__ == '__main__':
-    # Directory with the target images
+    # Directory with the photostorage images
     #target_dir = 'images/'
-    target_dir = r'E:\magic things\full-download'
+    target_dir = 'photostorage'
 
     # Variables to keep track of the best match
     best_match = None
@@ -64,7 +64,7 @@ if __name__ == '__main__':
 
     # Create a multiprocessing Pool
     with Pool() as p:
-        # Loop over all images in the target directory
+        # Loop over all images in the photostorage directory
         for filename in tqdm(os.listdir(target_dir)):
             # Process each image individually
             filename, num_good_matches = p.apply(calculate_good_matches, args=((filename, target_dir),))
