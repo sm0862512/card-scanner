@@ -2,11 +2,10 @@ import cv2 as cv
 import os
 from tqdm import tqdm
 from multiprocessing import Pool
-
 def calculate_good_matches(args):
     filename, target_dir = args
     # Load the query image
-    query_img = cv.imread('img.jpg', cv.IMREAD_GRAYSCALE)
+    query_img = cv.imread('img.png', cv.IMREAD_GRAYSCALE)
 
     # Load the current image
     current_img = cv.imread(os.path.join(target_dir, filename), cv.IMREAD_GRAYSCALE)
@@ -55,12 +54,11 @@ def calculate_good_matches(args):
 if __name__ == '__main__':
     # Directory with the photostorage images
     #target_dir = 'images/'
-    target_dir = 'photostorage'
+    target_dir = 'images/'
 
     # Variables to keep track of the best match
     best_match = None
     max_good_matches = 0
-    best_match_percentage = 0
 
     # Create a multiprocessing Pool
     with Pool() as p:
@@ -72,15 +70,13 @@ if __name__ == '__main__':
             if num_good_matches > max_good_matches:
                 max_good_matches = num_good_matches
                 best_match = filename
-                best_match_percentage = match_percentage
 
     # Print the best match
     print(f"The best match is: {best_match}")
-    print(f"Match percentage: {best_match_percentage}%")
     print(f"Number of good matches: {max_good_matches}")
 
     # Load the query image
-    query_img = cv.imread('largest_box.jpg')
+    query_img = cv.imread('img.png')
 
     # Load the best match
     best_match_img = cv.imread(os.path.join(target_dir, best_match))
