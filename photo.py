@@ -2,6 +2,7 @@ import cv2 as cv
 import os
 from tqdm import tqdm
 from multiprocessing import Pool
+
 def calculate_good_matches(args):
     filename, target_dir = args
     # Load the query image
@@ -12,8 +13,7 @@ def calculate_good_matches(args):
 
     # Check if images are loaded correctly
     if query_img is None or current_img is None:
-        #print(f"Error: Image {filename} not loaded correctly.")
-        return filename, 0
+        return filename, 0, 0
 
     # Resize the query image
     query_img = cv.resize(query_img, (100, 100))
@@ -36,12 +36,14 @@ def calculate_good_matches(args):
 
     # Check if descriptors are computed correctly
     if des1 is None or des2 is None:
-        #print(f"Error: Descriptors for image {filename} not computed correctly.")
-        return filename, 0
+        return filename, 0, 0
 
     # BFMatcher with default params
     bf = cv.BFMatcher()
     matches = bf.knnMatch(des1, des2, k=2)
+
+    # Calculate total number of matches
+    total_matches = len(matches)
 
     # Apply ratio test
     good = []
@@ -49,30 +51,35 @@ def calculate_good_matches(args):
         if m.distance < 0.75 * n.distance:
             good.append([m])
 
-    return filename, len(good)
+    # Calculate match percentage
+    match_percentage = (len(good) / total_matches) * 100
+
+    return filename, len(good), match_percentage
 
 if __name__ == '__main__':
     # Directory with the photostorage images
-    #target_dir = 'images/'
     target_dir = 'images/'
 
     # Variables to keep track of the best match
     best_match = None
     max_good_matches = 0
+    best_match_percentage = 0
 
     # Create a multiprocessing Pool
     with Pool() as p:
         # Loop over all images in the photostorage directory
         for filename in tqdm(os.listdir(target_dir)):
             # Process each image individually
-            filename, num_good_matches = p.apply(calculate_good_matches, args=((filename, target_dir),))
+            filename, num_good_matches, match_percentage = p.apply(calculate_good_matches, args=((filename, target_dir),))
             # If this image is a better match than the current best match, update the best match
             if num_good_matches > max_good_matches:
                 max_good_matches = num_good_matches
                 best_match = filename
+                best_match_percentage = match_percentage
 
     # Print the best match
     print(f"The best match is: {best_match}")
+    print(f"Match percentage: {best_match_percentage}%")
     print(f"Number of good matches: {max_good_matches}")
 
     # Load the query image
