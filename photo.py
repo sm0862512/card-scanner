@@ -10,6 +10,7 @@ from multiprocessing import Pool
 
 def query_database(name):
     # Connect to the SQLite database
+
     conn = sqlite3.connect('AllPrintings.sqlite')
 
     # Create a cursor
@@ -27,6 +28,7 @@ def query_database(name):
     return results
 def calculate_good_matches(args):
     filename, target_dir = args
+
     # Load the query image
     query_img = cv.imread('img.png', cv.IMREAD_GRAYSCALE)
 
@@ -81,7 +83,6 @@ def calculate_good_matches(args):
 if __name__ == '__main__':
     # Directory with the photostorage images
     target_dir = 'images/'
-
     # Variables to keep track of the best match
     best_match = None
     max_good_matches = 0
