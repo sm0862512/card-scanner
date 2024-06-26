@@ -1,8 +1,30 @@
+import sqlite3
+
 import cv2 as cv
 import os
+
+import requests
 from tqdm import tqdm
 from multiprocessing import Pool
 
+
+def query_database(name):
+    # Connect to the SQLite database
+    conn = sqlite3.connect('AllPrintings.sqlite')
+
+    # Create a cursor
+    c = conn.cursor()
+
+    # Execute the query
+    c.execute("SELECT * FROM cardidentifiers WHERE uuid=?", (name,))
+
+    # Fetch all the results
+    results = c.fetchall()
+
+    # Close the connection
+    conn.close()
+
+    return results
 def calculate_good_matches(args):
     filename, target_dir = args
     # Load the query image
@@ -89,8 +111,18 @@ if __name__ == '__main__':
     best_match_img = cv.imread(os.path.join(target_dir, best_match))
 
     # Display the images
+    name, extension = os.path.splitext(best_match)
+    results = query_database(name)
+
+    print(results[0][15])
+    apiurl = requests.get('https://api.scryfall.com/cards/' + results[0][15])
+    print(apiurl.json()['scryfall_uri'])
+
+
+
+
     query_img = cv.resize(query_img, (500, 500))
-    cv.imshow('Query Image', query_img)
-    cv.imshow('Best Match', best_match_img)
+    #cv.imshow('Query Image', query_img)
+    #cv.imshow('Best Match', best_match_img)
     cv.waitKey(0)
     cv.destroyAllWindows()
