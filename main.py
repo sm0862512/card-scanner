@@ -63,7 +63,7 @@ while True:
             # Crop and save the image of the box
             x, y, w, h = cv2.boundingRect(largest_contour)
             cropped_img = img[y:y+h, x:x+w]
-            cv2.imwrite('largest_box.jpg', cropped_img)
+            cv2.imwrite('Magic-Card.png', cropped_img)
 
             # Run the command and exit
             cv2.destroyAllWindows()

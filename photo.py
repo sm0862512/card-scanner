@@ -30,7 +30,7 @@ def calculate_good_matches(args):
     filename, target_dir = args
 
     # Load the query image
-    query_img = cv.imread('img.png', cv.IMREAD_GRAYSCALE)
+    query_img = cv.imread('Magic-Card.png', cv.IMREAD_GRAYSCALE)
 
     # Load the current image
     current_img = cv.imread(os.path.join(target_dir, filename), cv.IMREAD_GRAYSCALE)
@@ -106,7 +106,7 @@ if __name__ == '__main__':
     print(f"Number of good matches: {max_good_matches}")
 
     # Load the query image
-    query_img = cv.imread('img.png')
+    query_img = cv.imread('Magic-Card.png')
 
     # Load the best match
     best_match_img = cv.imread(os.path.join(target_dir, best_match))
