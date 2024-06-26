@@ -117,6 +117,7 @@ if __name__ == '__main__':
     print(results[0][15])
     apiurl = requests.get('https://api.scryfall.com/cards/' + results[0][15])
     print(apiurl.json()['scryfall_uri'])
+    os.system(f'start {apiurl.json()['scryfall_uri']}')
 
 
 
