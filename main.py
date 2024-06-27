@@ -68,6 +68,7 @@ while True:
             # Run the command and exit
             cv2.destroyAllWindows()
             subprocess.run(["python", "photo.py"])
+            break
 
 
     else:
