@@ -1,16 +1,18 @@
-import cv2
-import numpy as np
-import subprocess
-import time
-from multiprocessing import Queue
+import cv2  # OpenCV library for image processing
+import numpy as np  # Library for numerical operations
+import subprocess  # Library to run subprocesses
+import time  # Library to handle time-related tasks
+from multiprocessing import Queue  # Library to handle multiprocessing queues
 
 def is_contour_inside(contour1, contour2):
     """Check if contour1 is inside contour2."""
+    # Get a point from contour1
     point = tuple(float(coord) for coord in contour1[0][0])
+    # Check if the point is inside contour2
     return cv2.pointPolygonTest(contour2, point, False) > 0
 
 def main(status_queue):
-    # Try different camera indices
+    # Try different camera indices to find an available camera
     for index in range(5):
         cap = cv2.VideoCapture(index)
         if cap.isOpened():
@@ -27,22 +29,27 @@ def main(status_queue):
     # Initialize the timer
     start_time = None
     timer_threshold = 5  # Set the timer threshold to 5 seconds
-    scanned_cards = 0
+    scanned_cards = 0  # Counter for scanned cards
 
     while True:
-        # Capture a frame
+        # Capture a frame from the camera
         ret, img = cap.read()
 
         # Check if the frame is captured correctly
         if not ret or img is None:
             raise IOError("Cannot capture frame. Please check if the camera is working properly.")
 
-        # Apply the image processing steps
+        # Convert the image to grayscale
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        blur = cv2.GaussianBlur(gray, (13,13), 0)
+        # Apply Gaussian blur to the grayscale image
+        blur = cv2.GaussianBlur(gray, (13, 13), 0)
+        # Detect edges in the blurred image
         edges = cv2.Canny(blur, 50, 150)
-        kernel = np.ones((5,5), np.uint8)
+        # Create a kernel for dilation
+        kernel = np.ones((5, 5), np.uint8)
+        # Dilate the edges to make them more pronounced
         dilated = cv2.dilate(edges, kernel, iterations=2)
+        # Find contours in the dilated image
         contours, _ = cv2.findContours(dilated, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
         # Filter out contours that are inside other contours
@@ -68,14 +75,14 @@ def main(status_queue):
 
                 # Crop and save the image of the box
                 x, y, w, h = cv2.boundingRect(largest_contour)
-                cropped_img = img[y:y+h, x:x+w]
+                cropped_img = img[y:y + h, x:x + w]
                 cv2.imwrite('Magic-Card.png', cropped_img)
 
                 # Update the scanned cards count
                 scanned_cards += 1
                 status_queue.put(scanned_cards)
 
-                # Run the command and exit
+                # Run the command to execute `photo.py` and exit
                 cv2.destroyAllWindows()
                 subprocess.run(["python", "photo.py"])
                 break
@@ -91,7 +98,7 @@ def main(status_queue):
             cv2.drawContours(img, [box], 0, (0, 255, 0), 2)
 
         cv2.imshow("Original", img)
-        cv2.resizeWindow("Original", 1800, 1000)  # Resize the window to 640x480
+        cv2.resizeWindow("Original", 1800, 1000)  # Resize the window to 1800x1000
 
         # Break the loop if 'q' is pressed
         if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -102,5 +109,5 @@ def main(status_queue):
     cv2.destroyAllWindows()
 
 if __name__ == "__main__":
-    status_queue = Queue()
-    main(status_queue)
+    status_queue = Queue()  # Create a queue to share status between processes
+    main(status_queue)  # Run the main function
